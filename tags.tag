@@ -4,18 +4,19 @@
         <a href="#add">add</a>
         <a href="#list">list</a>
         |
-        <a onclick={gendata}>gen data</a>
+        <a onclick={commands.gendata}>gen data</a>
         |
         <a onclick={commands.rebuild_state}>rebuild state</a>
+        |
+        <a onclick={commands.clear}>Clear</a>
+        |
+        <a onclick={update}>Refresh</a>
     </div>
     <hr/>
     <route_target/>
     <hr/>
     <log_display/>
 
-    gendata() {
-        commands.gendata()
-    }
 </app>
 
 
@@ -78,6 +79,9 @@
     clear_filter(e) {
         session.selected_tags = new Set()
     }
+    update_req(){
+        this.update()
+    }
 </list_bm>
 
 <edit_bm>
@@ -117,10 +121,17 @@
 
 
 <log_display>
-    <div each={event in store.log}>
+    <div each={event in log}>
         event: {JSON.stringify(event)}
     </div>
 
     this.mixin(updateListener)
+    this.log = []
+    update_req(){
+        commands.get_log().then(function(arr){
+            this.log = arr
+            this.update()
+        }.bind(this))
+    }
 </log_display>
 

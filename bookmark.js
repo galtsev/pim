@@ -40,7 +40,8 @@ store.on("event", function(e){
 
 var updateListener = {
     init: function() {
-        var update_cb = this.update.bind(this)
+        console.log(this)
+        var update_cb = function() {this.update_req()}.bind(this)
         this.on('mount', function() {bm.on('update', update_cb)})
         this.on('unmount', function() {bm.off('update', update_cb)})
     }

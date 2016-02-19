@@ -37,3 +37,9 @@ function isSubset(s, sub) {
     }
     return true
 }
+
+function ok(msg) {
+    return function() {
+        console.log(msg)
+    }
+}

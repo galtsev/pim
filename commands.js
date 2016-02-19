@@ -2,7 +2,9 @@
 
 var commands = {
     create: function(url, title) {
-        store.put({et:"cr", ar:uid(), url:url, title:title})
+        var obj = {et:"cr", ar:uid(), url:url, title:title}
+        store.put(obj)
+        return obj
     },
     delete: function(ar) {
         store.put({et:"rm",ar:ar})
@@ -28,14 +30,25 @@ var commands = {
     list_bookmarks: function() {
         return valuesList(bm.state).filter(function(b){return isSubset(b.tags, session.selected_tags)})
     },
+    get_log: function() {
+        return store.get_log()
+    },
     rebuild_state: function() {
         bm.state = {}
         bm.start_batch()
-        for (obj of store.log) {
-            bm.eh[obj.et].bind(bm)(obj)
-        }
-        bm.end_batch()
-        console.log("complete")
+        store.get_log().then(function(arr){
+            for (var obj of arr) {
+                bm.eh[obj.et].bind(bm)(obj)
+            }
+        }).then(function(){console.log(bm.end_batch);bm.end_batch()}).then(ok("rebuild state complete"))
+        // for (obj of store.log) {
+        //     bm.eh[obj.et].bind(bm)(obj)
+        // }
+    },
+    clear: function() {
+        store.clear()
+        bm.state = {}
+        bm.trigger('update')
     }
 }
 
@@ -60,7 +73,8 @@ commands.gendata = function() {
         }
     }.bind(this))
     bm.end_batch()
-}
+    console.log("complete")
+}.bind(commands)
 
 var session = {
     selected_tags: new Set(['pin'])
