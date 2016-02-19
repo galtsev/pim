@@ -11,8 +11,8 @@ Store.prototype.put = function(obj) {
     this.last_id+=1
     obj.id = this.last_id
     this.log.push(obj)
-    this.event_handlers[obj.et].call(this, obj)
-    this.trigger('update')
+    //this.event_handlers[obj.et].call(this, obj)
+    this.trigger('event')
 }
 
 Store.prototype.create = function(url, title) {
@@ -68,34 +68,46 @@ Store.prototype.gendata = function() {
 
 store = new Store()
 
-store.event_handlers["cr"] = function(obj){
+var bm = riot.observable()
+
+_.extend(bm, {
+    state: {},
+    eh: {}
+})
+
+store.on("event", function(e){
+    bm.eh[e.et].bind(bm)(e)
+    bm.trigger('update')
+})
+
+bm.eh.cr = function(obj){
     this.state[obj.ar] = _.clone(obj)
 }
 
-store.event_handlers["rm"] = function(obj){
+bm.eh.rm = function(obj){
     delete this.state[obj.ar]
 }
 
-store.event_handlers["ed"] = function(obj){
+bm.eh.ed = function(obj){
     this.state[obj.ar].title = obj.title
 }
 
-store.event_handlers["tag"] = function(obj){
+bm.eh.tag = function(obj){
     bm = this.state[obj.ar]
     tags = "tags" in bm ? bm.tags : {}
     tags[obj.tag] = 1
     bm.tags = tags
 }
 
-store.event_handlers["untag"] = function(obj) {
+bm.eh.untag = function(obj) {
     delete this.state[obj.ar].tags[obj.tag]
 }
 
 var updateListener = {
     init: function() {
         var update_cb = this.update.bind(this)
-        this.on('mount', function() {store.on('update', update_cb)})
-        this.on('unmount', function() {store.off('update', update_cb)})
+        this.on('mount', function() {bm.on('update', update_cb)})
+        this.on('unmount', function() {bm.off('update', update_cb)})
     }
 }
 

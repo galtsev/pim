@@ -1,11 +1,18 @@
 a {
     cursor: pointer;
+    text-decoration: underline;
+    color: #0000EE;
 }
 
 body {
-    font-size: 18px;
+    font-size: 14px;
+    font-family: monospace,sans-serif;
 }
 
 td {
     padding: 4px 12px;
+}
+
+div {
+    padding-bottom: 4px;
 }

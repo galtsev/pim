@@ -5,12 +5,16 @@
         <a href="#list">list</a>
         |
         <a onclick={gendata}>gen data</a>
+        |
+        <a onclick={commands.rebuild_state}>rebuild state</a>
     </div>
+    <hr/>
     <route_target/>
+    <hr/>
     <log_display/>
 
     gendata() {
-        store.gendata()
+        commands.gendata()
     }
 </app>
 
@@ -26,7 +30,7 @@
     this.r('add', goto('add_bm'))
     this.r('list', goto('list_bm'))
     this.r('edit/*', goto('edit_bm'))
-    riot.route.start()
+    riot.route.start(true)
 </route_target>
 
 
@@ -38,24 +42,41 @@
     </div>
 
     process(e) {
-        store.create(this.url.value, this.title.value)
+        commands.create(this.url.value, this.title.value)
     }
 </add_bm>
 
 
 <list_bm>
+    <div>
+        <span each={tag,cnt in commands.list_tags()}><a onclick={add_tag_filter}>{tag}:{cnt}</a>, </span>
+    </div>
+    <div>
+        Fitered by tags:
+        <a each={tag in toArray(session.selected_tags)} onclick={remove_tag_filter}>{tag}, </a>
+        <a onclick={clear_filter}>Clear filters</a>
+    </div>
     <table>
-    <tr each={k,v in store.state}>
+    <tr each={v in commands.list_bookmarks()}>
         <td><a href={v.url} target="_blank">{v.title}</a></td>
         <td><a onclick={del_item}>del</a></td>
         <td><a href="#edit/{v.ar}">edit</a></td>
-        <td><span each={t,o in v.tags}>{t},</span><td>
+        <td><span each={t in toArray(v.tags)}>{t},</span><td>
     </tr>
     </table>
 
     this.mixin(updateListener)
     del_item(e) {
-        store.delete(e.item.v.ar)
+        commands.delete(e.item.v.ar)
+    }
+    add_tag_filter(e) {
+        session.selected_tags.add(e.item.tag)
+    }
+    remove_tag_filter(e) {
+        session.selected_tags.delete(e.item.tag)
+    }
+    clear_filter(e) {
+        session.selected_tags = new Set()
     }
 </list_bm>
 
@@ -75,20 +96,21 @@
             <button onclick={add_tag}>Add tag</button>
         </div>
         <div>
-            delete tags: <a each={k,v in obj.tags} onclick={del_tag}>{k},</a>
+            delete tags: <a each={t in toArray(obj.tags)} onclick={del_tag}>{t}, </a>
         </div>
 
     </div>
 
-    this.obj = store.state[this.opts.ar]
+    this.obj = bm.state[this.opts.ar]
     update_title(e) {
-        store.edit_title(this.opts.ar, this.title.value)
+        commands.edit_title(this.opts.ar, this.title.value)
     }
     add_tag(e) {
-        store.add_tag(this.opts.ar, this.tag.value)
+        commands.add_tag(this.opts.ar, this.tag.value)
+        this.tag.value = ''
     }
     del_tag(e) {
-        store.del_tag(this.opts.ar, e.item.k)
+        commands.del_tag(this.opts.ar, e.item.t)
     }
 
 </edit_bm>
@@ -102,20 +124,3 @@
     this.mixin(updateListener)
 </log_display>
 
-
-<state_display>
-    <div each={k,v in store.state}>
-        bookmark: {k} : {JSON.stringify(v)} <a class="cmd" onclick={del_item}>del</a>
-    </div>
-
-    <style>
-        a.cmd {
-            cursor: pointer;
-        }
-    </style>
-
-    this.mixin(updateListener)
-    del_item(e) {
-        store.delete(e.item.v.ar)
-    }
-</state_display>
