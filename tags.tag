@@ -39,13 +39,25 @@
     <div>
         <div> url: <input name="url" type="text" /> </div>
         <div> title: <input name="title" type="text" /> </div>
+        <div> tags: <input name="atags" type="text" /></div>
         <button onclick={process}>Create</button>
     </div>
 
     process(e) {
-        commands.create(this.url.value, this.title.value)
+        var tags = this.atags.value.split(',').map(function(v){return v.trim()}).filter(function(v){return v})
+        commands.create(this.url.value, this.title.value, tags)
     }
 </add_bm>
+
+<tag_list>
+    <span>
+        <span each={tag in opts.tags}><a onclick={do_click}>{tag}</a>, </span>
+    </span>
+
+    do_click(e) {
+        opts.onclick(e.item.tag)
+    }
+</tag_list>
 
 
 <list_bm>
@@ -54,7 +66,8 @@
     </div>
     <div>
         Fitered by tags:
-        <a each={tag in toArray(session.selected_tags)} onclick={remove_tag_filter}>{tag}, </a>
+        <tag_list tags={toArray(session.selected_tags)} onclick={remove_tag_filter} />
+        |
         <a onclick={clear_filter}>Clear filters</a>
     </div>
     <table>
@@ -73,8 +86,8 @@
     add_tag_filter(e) {
         session.selected_tags.add(e.item.tag)
     }
-    remove_tag_filter(e) {
-        session.selected_tags.delete(e.item.tag)
+    remove_tag_filter(tag) {
+        session.selected_tags.delete(tag)
     }
     clear_filter(e) {
         session.selected_tags = new Set()
@@ -100,7 +113,8 @@
             <button onclick={add_tag}>Add tag</button>
         </div>
         <div>
-            delete tags: <a each={t in toArray(obj.tags)} onclick={del_tag}>{t}, </a>
+            delete tags: 
+            <tag_list tags={toArray(obj.tags)} onclick={del_tag} />
         </div>
 
     </div>
@@ -110,11 +124,13 @@
         commands.edit_title(this.opts.ar, this.title.value)
     }
     add_tag(e) {
-        commands.add_tag(this.opts.ar, this.tag.value)
+        if (this.tag.value) {
+            commands.add_tag(this.opts.ar, this.tag.value)
+        }
         this.tag.value = ''
     }
-    del_tag(e) {
-        commands.del_tag(this.opts.ar, e.item.t)
+    del_tag(tag) {
+        commands.del_tag(this.opts.ar, tag)
     }
 
 </edit_bm>

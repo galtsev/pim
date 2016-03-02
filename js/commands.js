@@ -1,9 +1,15 @@
 
 
 var commands = {
-    create: function(url, title) {
-        var obj = {et:"cr", ar:uid(), url:url, title:title}
+    create: function(url, title, tags) {
+        var ar = uid()
+        var obj = {et:"cr", ar:ar, url:url, title:title}
         store.put(obj)
+        if (tags) {
+            for (var tag of tags) {
+                store.put({et:'tag', ar:ar, tag:tag})
+            }
+        }
         return obj
     },
     delete: function(ar) {
@@ -40,7 +46,7 @@ var commands = {
             for (var obj of arr) {
                 bm.eh[obj.et].bind(bm)(obj)
             }
-        }).then(function(){console.log(bm.end_batch);bm.end_batch()}).then(ok("rebuild state complete"))
+        }).then(function(){bm.end_batch()}).then(ok("rebuild state complete"))
         // for (obj of store.log) {
         //     bm.eh[obj.et].bind(bm)(obj)
         // }
@@ -55,23 +61,23 @@ var commands = {
 
 commands.gendata = function() {
     bm.start_batch()
-    this.create("http://linux.org.ru", "linux org ru")
-    this.create("http://bash.im", "bash")
-    this.create("http://python.org", "python.org")
-    this.create("https://golang.org/doc/", "golang docs")
+    this.create("http://linux.org.ru", "linux org ru", ["social","linux","doc"])
+    this.create("http://bash.im", "bash", ["social"])
+    this.create("http://python.org", "python.org", ["python","doc"])
+    this.create("https://golang.org/doc/", "golang docs", ["golang","doc"])
     // var self = this
-    eachValue(bm.state, function(obj){
-        var ar = obj.ar
-        if (obj.title=="bash") {
-            this.add_tag(ar, "social")
-        } else if (obj.title=="python.org") {
-            this.add_tag(ar, "doc")
-            this.add_tag(ar, "python")
-        } else if (obj.title=="golang docs") {
-            this.add_tag(ar, "golang")
-            this.add_tag(ar, "doc")
-        }
-    }.bind(this))
+    // eachValue(bm.state, function(obj){
+    //     var ar = obj.ar
+    //     if (obj.title=="bash") {
+    //         this.add_tag(ar, "social")
+    //     } else if (obj.title=="python.org") {
+    //         this.add_tag(ar, "doc")
+    //         this.add_tag(ar, "python")
+    //     } else if (obj.title=="golang docs") {
+    //         this.add_tag(ar, "golang")
+    //         this.add_tag(ar, "doc")
+    //     }
+    // }.bind(this))
     bm.end_batch()
     console.log("complete")
 }.bind(commands)
