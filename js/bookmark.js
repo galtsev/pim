@@ -49,7 +49,7 @@ _.extend(Bookmarks.prototype, {
             ar: o.ar,
             url: o.url,
             title: o.title,
-            tags: new Set(o.tags.values())
+            tags: o.tags.slice()
         }
         return new Promise(function(resolve, reject) {
             resolve(res)
@@ -59,7 +59,7 @@ _.extend(Bookmarks.prototype, {
 
     eh: {
         cr: function(obj){
-            this.state[obj.ar]  = {ar:obj.ar, url:obj.url, title: obj.title, tags:new Set()}
+            this.state[obj.ar]  = {ar:obj.ar, url:obj.url, title: obj.title, tags:[]}
         },
         rm: function(obj){
             delete this.state[obj.ar]
@@ -68,10 +68,11 @@ _.extend(Bookmarks.prototype, {
             this.state[obj.ar].title = obj.title
         },
         tag: function(obj){
-            this.state[obj.ar].tags.add(obj.tag)
+            appendUnique(this.state[obj.ar].tags, obj.tag)
         },
         untag: function(obj) {
-            this.state[obj.ar].tags.delete(obj.tag)
+            var bookmark = this.state[obj.ar]
+            bookmark.tags = _.without(bookmark.tags, obj.tag)
         }
     }
 })

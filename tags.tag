@@ -81,7 +81,7 @@
         <td><a href={v.url} target="_blank">{v.title}</a></td>
         <td><a onclick={del_item}>del</a></td>
         <td><a href="#edit/{v.ar}">edit</a></td>
-        <td><span each={t in toArray(v.tags)}>{t},</span><td>
+        <td><span each={t in v.tags}>{t},</span><td>
     </tr>
     </table>
 
@@ -133,7 +133,7 @@
         </div>
         <div>
             delete tags: 
-            <tag_list tags={toArray(obj.tags)} onclick={del_tag} />
+            <tag_list tags={obj.tags} onclick={del_tag} />
         </div>
 
     </div>
@@ -144,15 +144,15 @@
     }
     add_tag(e) {
         var t = this.tag.value.trim()
-        if (t && !this.obj.tags.has(t)) {
+        if (t && !_.contains(this.obj.tags,t)) {
             commands.add_tag(this.obj.ar, t)
-            this.obj.tags.add(t)
+            this.obj.tags.push(t)
         }
         this.tag.value = ''
     }
     del_tag(tag) {
         commands.del_tag(this.obj.ar, tag)
-        this.obj.tags.delete(tag)
+        this.obj.tags = _.without(this.obj.tags,tag)
     }
 
 </edit_bm>

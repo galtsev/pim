@@ -32,7 +32,7 @@ function valuesList(obj) {
 
 function isSubset(s, sub) {
     for (var v of sub) {
-        if (!s.has(v)) {
+        if (!_.contains(s,v)) {
             return false
         }
     }
@@ -44,3 +44,10 @@ function ok(msg) {
         console.log(msg)
     }
 }
+
+function appendUnique(arr, value) {
+    if (!_.contains(arr, value)) {
+        arr.push(value)
+    }
+}
+
