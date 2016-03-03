@@ -62,7 +62,7 @@
 
 <list_bm>
     <div>
-        <span each={tag,cnt in commands.list_tags()}><a onclick={add_tag_filter}>{tag}:{cnt}</a>, </span>
+        <span each={tag,cnt in bm.list_tags()}><a onclick={add_tag_filter}>{tag}:{cnt}</a>, </span>
     </div>
     <div>
         Fitered by tags:
@@ -71,7 +71,7 @@
         <a onclick={clear_filter}>Clear filters</a>
     </div>
     <table>
-    <tr each={v in commands.list_bookmarks()}>
+    <tr each={v in bm.list_bookmarks(session.selected_tags)}>
         <td><a href={v.url} target="_blank">{v.title}</a></td>
         <td><a onclick={del_item}>del</a></td>
         <td><a href="#edit/{v.ar}">edit</a></td>
@@ -119,7 +119,7 @@
 
     </div>
 
-    this.obj = bm.state[this.opts.ar]
+    this.obj = bm.get_bookmark(this.opts.ar)
     update_title(e) {
         commands.edit_title(this.opts.ar, this.title.value)
     }

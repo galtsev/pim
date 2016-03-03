@@ -1,9 +1,14 @@
 
-var bm = riot.observable()
+function Bookmarks(store) {
+    riot.observable(this)
+    this.store = store
+    this.state = {}
+    this.batch = false
+    var self = this
+    store.on("event", this.process_event.bind(self))
+}
 
-_.extend(bm, {
-    state: {},
-    batch: false,
+_.extend(Bookmarks.prototype, {
     start_batch: function() {
         this.batch = true
     },
@@ -11,6 +16,32 @@ _.extend(bm, {
         this.batch = false
         this.trigger('update')
     },
+    list_tags: function() {
+        var tag_dict = {}
+        Object.keys(this.state).forEach(function(ar){
+            this.state[ar].tags.forEach(function(tag){
+                tag_dict[tag] = getnz(tag_dict[tag],0)+1
+            })
+        })
+        return tag_dict
+    },
+    list_bookmarks: function(selected_tags) {
+        return valuesList(this.state).filter(function(b){return isSubset(b.tags, selected_tags)})
+    },
+    clear: function() {
+        this.state = {}
+    },
+    process_event: function(e) {
+        this.eh[e.et].bind(this)(e)
+        if (!this.batch) {
+            this.trigger('update')
+        }
+    },
+    get_bookmark: function(ar) {
+        return this.state[ar]
+    },
+
+
     eh: {
         cr: function(obj){
             this.state[obj.ar]  = {ar:obj.ar, url:obj.url, title: obj.title, tags:new Set()}
@@ -29,20 +60,4 @@ _.extend(bm, {
         }
     }
 })
-
-store.on("event", function(e){
-    bm.eh[e.et].bind(bm)(e)
-    if (!bm.batch) {
-        bm.trigger('update')
-    }
-})
-
-
-var updateListener = {
-    init: function() {
-        var update_cb = function() {this.update_req()}.bind(this)
-        this.on('mount', function() {bm.on('update', update_cb)})
-        this.on('unmount', function() {bm.off('update', update_cb)})
-    }
-}
 

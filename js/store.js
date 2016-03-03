@@ -1,17 +1,12 @@
 
-function connect(db_name) {
-    var db = new Dexie(db_name)
-    db.version(1).stores({log:"++id"})
-    db.open()
-    return db
+
+function Store(db) {
+    riot.observable(this)
+    this.db = db
+    this.last_id = 1
 }
 
-var store = riot.observable()
-
-_.extend(store, {
-    //log: [],
-    db: connect('bookmarks'),
-    last_id: 1,
+_.extend(Store.prototype, {
     put: function(obj) {
         this.db.log.add(obj)
         this.trigger('event', obj)
