@@ -1,3 +1,4 @@
+"use strict"
 
 function getnz(a,b) {
     return a?a:b
@@ -5,7 +6,7 @@ function getnz(a,b) {
 
 function toArray(s) {
     var res = []
-    for (e of s) {
+    for (var e of s) {
         res.push(e)
     }
     return res
@@ -16,21 +17,21 @@ function uid() {
 }
 
 function eachValue(obj, fn) {
-    for (k of Object.keys(obj)) {
+    for (var k of Object.keys(obj)) {
         fn(obj[k])
     }
 }
 
 function valuesList(obj) {
     var res = []
-    for (k of Object.keys(obj)) {
+    for (var k of Object.keys(obj)) {
         res.push(obj[k])
     }
     return res
 }
 
 function isSubset(s, sub) {
-    for (v of sub) {
+    for (var v of sub) {
         if (!s.has(v)) {
             return false
         }

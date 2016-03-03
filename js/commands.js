@@ -1,3 +1,4 @@
+"use strict"
 
 function Commands(store, bm, session) {
     var commands = {
@@ -39,6 +40,9 @@ function Commands(store, bm, session) {
         clear: function() {
             store.clear()
             bm.clear()
+            bm.trigger('update')
+        },
+        refresh: function() {
             bm.trigger('update')
         }
     }

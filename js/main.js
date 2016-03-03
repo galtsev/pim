@@ -1,7 +1,9 @@
+"use strict"
 
 function connect(db_name) {
     var db = new Dexie(db_name)
     db.version(1).stores({log:"++id"})
+    db.version(2).stores({log:"++id",bm:"ar"})
     db.open()
     return db
 }
@@ -14,7 +16,7 @@ var db = connect('bookmarks')
 
 var store = new Store(db)
 
-var bm = new Bookmarks(store)
+var bm = new Bookmarks(store,db)
 
 var commands = Commands(store, bm, session)
 

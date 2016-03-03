@@ -10,12 +10,11 @@
         |
         <a onclick={commands.clear}>Clear</a>
         |
-        <a onclick={update}>Refresh</a>
+        <a onclick={commands.refresh}>Refresh</a>
     </div>
     <hr/>
     <route_target/>
     <hr/>
-    <log_display/>
 
 </app>
 
@@ -25,12 +24,19 @@
     var goto = function(page) {
         return function(arg) {
             riot.mount(self.root, page, {ar: arg})
+            commands.refresh()
         }
+    }
+    edit(ar) {
+        bm.get_bookmark(ar)
+        .then(function(obj){
+            riot.mount(self.root, 'edit_bm', obj)
+        })
     }
     this.r = riot.route.create()
     this.r('add', goto('add_bm'))
     this.r('list', goto('list_bm'))
-    this.r('edit/*', goto('edit_bm'))
+    this.r('edit/*', this.edit)
     riot.route.start(true)
 </route_target>
 
@@ -62,7 +68,7 @@
 
 <list_bm>
     <div>
-        <span each={tag,cnt in bm.list_tags()}><a onclick={add_tag_filter}>{tag}:{cnt}</a>, </span>
+        <span each={tag,cnt in all_tags}><a onclick={add_tag_filter}>{tag}:{cnt}</a>, </span>
     </div>
     <div>
         Fitered by tags:
@@ -71,7 +77,7 @@
         <a onclick={clear_filter}>Clear filters</a>
     </div>
     <table>
-    <tr each={v in bm.list_bookmarks(session.selected_tags)}>
+    <tr each={v in all_bookmarks}>
         <td><a href={v.url} target="_blank">{v.title}</a></td>
         <td><a onclick={del_item}>del</a></td>
         <td><a href="#edit/{v.ar}">edit</a></td>
@@ -79,21 +85,34 @@
     </tr>
     </table>
 
+    this.all_tags = {}
+    this.all_bookmarks = []
     this.mixin(updateListener)
     del_item(e) {
         commands.delete(e.item.v.ar)
     }
     add_tag_filter(e) {
         session.selected_tags.add(e.item.tag)
+        this.update_req()
     }
     remove_tag_filter(tag) {
         session.selected_tags.delete(tag)
+        this.update_req()
     }
     clear_filter(e) {
         session.selected_tags = new Set()
+        this.update_req()
     }
     update_req(){
-        this.update()
+        var self = this
+        bm.list_bookmarks(session.selected_tags)
+        .then(function(bookmarks){
+            self.all_bookmarks = bookmarks
+            return bm.list_tags()
+        }).then(function(tags){
+            self.all_tags = tags
+            self.update()
+        })
     }
 </list_bm>
 
@@ -119,18 +138,21 @@
 
     </div>
 
-    this.obj = bm.get_bookmark(this.opts.ar)
+    this.obj = this.opts
     update_title(e) {
-        commands.edit_title(this.opts.ar, this.title.value)
+        commands.edit_title(this.obj.ar, this.title.value)
     }
     add_tag(e) {
-        if (this.tag.value) {
-            commands.add_tag(this.opts.ar, this.tag.value)
+        var t = this.tag.value.trim()
+        if (t && !this.obj.tags.has(t)) {
+            commands.add_tag(this.obj.ar, t)
+            this.obj.tags.add(t)
         }
         this.tag.value = ''
     }
     del_tag(tag) {
-        commands.del_tag(this.opts.ar, tag)
+        commands.del_tag(this.obj.ar, tag)
+        this.obj.tags.delete(tag)
     }
 
 </edit_bm>
