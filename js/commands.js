@@ -29,13 +29,17 @@ function Commands(store, bm, session) {
             return store.get_log()
         },
         rebuild_state: function() {
-            bm.clear()
             bm.start_batch()
-            store.get_log().then(function(arr){
-                for (var obj of arr) {
-                    bm.process_event(obj)
-                }
-            }).then(function(){bm.end_batch()}).then(ok("rebuild state complete"))
+            console.log('start rebuild')
+            bm.clear()
+            .then(store.get_log.bind(store))
+            .then(events=>processSeq(events,bm.process_event.bind(bm)))
+            .then(()=>{
+                bm.end_batch()
+                bm.trigger('update')
+                console.log("rebuild complete")
+            })
+            .catch(showErr)
         },
         clear: function() {
             store.clear()

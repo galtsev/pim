@@ -9,7 +9,7 @@ function connect(db_name) {
 }
 
 var session = {
-    selected_tags: new Set(['pin'])
+    selected_tags: new Set()
 }
 
 var db = connect('bookmarks')
@@ -22,7 +22,7 @@ var commands = Commands(store, bm, session)
 
 var updateListener = {
     init: function() {
-        var update_cb = function() {this.update_req()}.bind(this)
+        var update_cb = function(){this.update_req()}.bind(this)
         this.on('mount', function() {bm.on('update', update_cb)})
         this.on('unmount', function() {bm.off('update', update_cb)})
     }

@@ -51,3 +51,34 @@ function appendUnique(arr, value) {
     }
 }
 
+function promisify(fn) {
+    return new Promise((resolve,reject)=>resolve(fn()))
+}
+
+function showErr(msg) {
+    console.log(msg)
+}
+
+function processSeq(iter, fn) {
+    if (!('next' in iter)) {
+        iter = iter[Symbol.iterator]()
+    }
+    return new Promise(function(resolve,reject){
+        var sup = function() {
+            var job = iter.next()
+            if (job.done) {
+                resolve(0)
+            } else {
+                fn(job.value).then(sup)
+            }
+        }
+        sup()
+    })
+}
+
+function thenDebug(data) {
+    return new Promise((resolve,reject)=>{
+        console.log(data)
+        resolve(data)
+    })
+}

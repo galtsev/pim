@@ -27,16 +27,10 @@
             commands.refresh()
         }
     }
-    edit(ar) {
-        bm.get_bookmark(ar)
-        .then(function(obj){
-            riot.mount(self.root, 'edit_bm', obj)
-        })
-    }
     this.r = riot.route.create()
     this.r('add', goto('add_bm'))
     this.r('list', goto('list_bm'))
-    this.r('edit/*', this.edit)
+    this.r('edit/*', goto('edit_bm'))
     riot.route.start(true)
 </route_target>
 
@@ -105,15 +99,16 @@
     }
     update_req(){
         var self = this
-        bm.list_bookmarks(session.selected_tags)
-        .then(function(bookmarks){
-            self.all_bookmarks = bookmarks
-            return bm.list_tags()
-        }).then(function(tags){
-            self.all_tags = tags
+        Promise.all([
+            bm.list_bookmarks(session.selected_tags),
+            bm.list_tags()
+        ]).then(([bookmarks, tags])=>{
+            this.all_bookmarks = bookmarks
+            this.all_tags = tags
             self.update()
         })
     }
+    this.on('mount', ()=>this.update_req())
 </list_bm>
 
 <edit_bm>
@@ -138,7 +133,12 @@
 
     </div>
 
-    this.obj = this.opts
+    //this.obj = this.opts
+    this.obj = {}
+    this.on('mount', function() {
+        bm.get_bookmark(this.opts.ar)
+        .then((o)=>this.update({obj:o}))
+    })
     update_title(e) {
         commands.edit_title(this.obj.ar, this.title.value)
     }

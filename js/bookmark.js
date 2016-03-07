@@ -29,10 +29,7 @@ _.extend(Bookmarks.prototype, {
         })
     },
     list_bookmarks: function(selected_tags) {
-        var self = this
-        return new Promise(function(resolve, reject){
-            resolve(valuesList(self.state).filter(function(b){return isSubset(b.tags, selected_tags)}))
-        })
+        return Promise.resolve(valuesList(this.state).filter(function(b){return isSubset(b.tags, selected_tags)}))
     },
     clear: function() {
         this.state = {}
@@ -45,14 +42,11 @@ _.extend(Bookmarks.prototype, {
     },
     get_bookmark: function(ar) {
         var o = this.state[ar]
-        var res = {
+        return Promise.resolve( {
             ar: o.ar,
             url: o.url,
             title: o.title,
             tags: o.tags.slice()
-        }
-        return new Promise(function(resolve, reject) {
-            resolve(res)
         })
     },
 
