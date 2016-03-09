@@ -55,7 +55,7 @@
     </span>
 
     do_click(e) {
-        opts.onclick(e.item.tag)
+        opts.tagclick(e.item.tag)
     }
 </tag_list>
 
@@ -66,7 +66,7 @@
     </div>
     <div>
         Fitered by tags:
-        <tag_list tags={toArray(session.selected_tags)} onclick={remove_tag_filter} />
+        <tag_list tags={toArray(session.selected_tags)} tagclick={remove_tag_filter} />
         |
         <a onclick={clear_filter}>Clear filters</a>
     </div>
@@ -128,7 +128,7 @@
         </div>
         <div>
             delete tags: 
-            <tag_list tags={obj.tags} onclick={del_tag} />
+            <tag_list tags={obj.tags} tagclick={del_tag} />
         </div>
 
     </div>
