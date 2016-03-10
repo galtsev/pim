@@ -1,22 +1,21 @@
 "use strict"
 
 
-function Store(db) {
-    riot.observable(this)
-    this.db = db
-    this.last_id = 1
-}
-
-_.extend(Store.prototype, {
-    put: function(obj) {
+class Store {
+    constructor(db) {
+        riot.observable(this)
+        this.db = db
+        this.last_id = 1
+    }
+    put(obj) {
         this.db.log.add(obj)
         this.trigger('event', obj)
-    },
-    get_log: function() {
+    }
+    get_log() {
         return this.db.log.toArray()
-    },
-    clear: function() {
+    }
+    clear() {
         this.db.log.clear()
     }
-})
+}
 
