@@ -1,28 +1,27 @@
 "use strict"
 
-function Bookmarks(store, db) {
+function Bookmarks(db) {
     riot.observable(this)
-    this.store = store
-    //this.state = {}
     this.db = db
-    this.batch = false
-    store.on("event", this.process_event.bind(this))
+    this.in_batch = false
 }
 
 _.extend(Bookmarks.prototype, {
-    start_batch: function() {
-        this.batch = true
-    },
-    end_batch: function() {
-        this.batch = false
-        this.trigger('update')
+    batch: function(batch_fn) {
+        this.in_batch = true
+        return this.db.transaction('rw', [db.bm, db.log], batch_fn)
+        .then(()=>{
+            this.in_batch=false
+            this.trigger('update')
+        })
     },
     list_tags: function() {
         var tag_dict = {}
         return this.db.bm.each(function(b){
             b.tags.forEach(function(tag){
                 tag_dict[tag] = getnz(tag_dict[tag],0)+1
-            })}).then(Promise.resolve(tag_dict))
+            })
+        }).then(()=>tag_dict)
     },
     list_bookmarks: function(selected_tags) {
         return this.db.bm.filter(function(b){return isSubset(b.tags, selected_tags)}).toArray()
@@ -31,11 +30,7 @@ _.extend(Bookmarks.prototype, {
         return this.db.bm.clear()
     },
     process_event: function(e) {
-        return this.eh[e.et].bind(this)(e).then(function(){
-            if (!this.batch) {
-                this.trigger('update')
-            }
-        }.bind(this))
+        return this.eh[e.et].bind(this)(e)
     },
     get_bookmark: function(ar) {
         return this.db.bm.get(ar)

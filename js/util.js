@@ -82,3 +82,24 @@ function thenDebug(data) {
         resolve(data)
     })
 }
+
+class SeqQueue {
+    constructor() {
+        riot.observable(this)
+        this.queue = []
+    }
+    put(task) {
+        this.queue.push(task)
+        if (this.queue.length==1) {
+            setTimeout(this.next.bind(this),0)
+        }
+    }
+    next() {
+        var task = this.queue.shift()
+        if (!task) {
+            this.trigger('drained')
+            return
+        }
+        task(this.next.bind(this))
+    }
+}

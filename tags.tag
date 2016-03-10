@@ -24,7 +24,6 @@
     var goto = function(page) {
         return function(arg) {
             riot.mount(self.root, page, {ar: arg})
-            commands.refresh()
         }
     }
     this.r = riot.route.create()

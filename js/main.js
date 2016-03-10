@@ -14,9 +14,16 @@ var session = {
 
 var db = connect('bookmarks')
 
+
 var store = new Store(db)
 
-var bm = new Bookmarks(store,db)
+var bm = new Bookmarks(db)
+
+var event_queue = new SeqQueue()
+
+store.on('event', obj=> event_queue.put(done=> bm.process_event(obj).then(done)))
+
+event_queue.on('drained', ()=>bm.trigger('update'))
 
 var commands = Commands(store, bm, session)
 
