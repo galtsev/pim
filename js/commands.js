@@ -43,11 +43,11 @@ function Commands(store, bm, session) {
             bm.trigger('update')
         },
         gendata: function() {
-            this.create("http://linux.org.ru", "linux org ru", ["social","linux","doc"])
-            this.create("http://bash.im", "bash", ["social"])
-            this.create("http://python.org", "python.org", ["python","doc"])
-            this.create("https://golang.org/doc/", "golang docs", ["golang","doc"])
-        }.bind(commands)
+            commands.create("http://linux.org.ru", "linux org ru", ["social","linux","doc"])
+            commands.create("http://bash.im", "bash", ["social"])
+            commands.create("http://python.org", "python.org", ["python","doc"])
+            commands.create("https://golang.org/doc/", "golang docs", ["golang","doc"])
+        }
     }
 
     return commands
